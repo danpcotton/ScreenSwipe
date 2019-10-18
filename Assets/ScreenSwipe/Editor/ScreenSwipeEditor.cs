@@ -7,10 +7,14 @@ public class ScreenSwipeEditor : Editor
 	// editing
 	SerializedProperty _editingScreen;
 
+    // parent scrollview
+    SerializedProperty _parentScrollView;
+
 	//swipe
 	SerializedProperty _swipeType;
 	SerializedProperty _swipeTime;
 	SerializedProperty _swipeVelocityThreshold;
+	SerializedProperty _skipScreenVelocityThreshold;
 
 	// content
 	SerializedProperty _maskContent;
@@ -33,7 +37,6 @@ public class ScreenSwipeEditor : Editor
 
 	// tween
 	SerializedProperty _tweenTime;
-	SerializedProperty _ease;
 
 	// events
 	SerializedProperty _onScreenDrag;
@@ -44,10 +47,14 @@ public class ScreenSwipeEditor : Editor
 		// editing
 		_editingScreen = serializedObject.FindProperty("editingScreen");
 
-		// swipe
-		_swipeType = serializedObject.FindProperty("swipeType");
+        // parent scroll view
+        _parentScrollView = serializedObject.FindProperty("ParentScrollView");
+
+        // swipe
+        _swipeType = serializedObject.FindProperty("swipeType");
 		_swipeTime = serializedObject.FindProperty("swipeTime");
 		_swipeVelocityThreshold = serializedObject.FindProperty("swipeVelocityThreshold");
+		_skipScreenVelocityThreshold = serializedObject.FindProperty("skipScreenVelocityThreshold");
 
 		// content
 		_maskContent = serializedObject.FindProperty("maskContent");
@@ -70,7 +77,6 @@ public class ScreenSwipeEditor : Editor
 
 		// tween
 		_tweenTime = serializedObject.FindProperty("tweenTime");
-		_ease = serializedObject.FindProperty("ease");
 
 		// events
 		_onScreenDrag = serializedObject.FindProperty("onScreenDragBegin");
@@ -87,6 +93,9 @@ public class ScreenSwipeEditor : Editor
 		EditorGUILayout.PropertyField(_editingScreen);
 		if (GUILayout.Button("GoToScreen"))
 			_target.EditingScreen();
+
+        // parent scrollview
+        EditorGUILayout.PropertyField(_parentScrollView);
 
 		//swipe
 		EditorGUILayout.PropertyField(_swipeType);
@@ -116,7 +125,6 @@ public class ScreenSwipeEditor : Editor
 
 		// tween
 		EditorGUILayout.PropertyField(_tweenTime);
-		EditorGUILayout.PropertyField(_ease);
 
 		//events
 		EditorGUILayout.PropertyField(_onScreenDrag);

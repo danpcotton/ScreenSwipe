@@ -18,6 +18,9 @@ public class ScreenSwipe : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndD
 		Vertical
 	}
 
+    [Header("Parent"), Tooltip("If this component is embedded in a ScrollView, assign here to handle drags correctly")]
+    public ScrollRect ParentScrollView = null;
+
 	[Header("Swipe")]
 	[SerializeField]
 	private SwipeType swipeType = SwipeType.Horizontal;
@@ -184,7 +187,15 @@ public class ScreenSwipe : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndD
 		}
 	}
 
-	private void OnEnable()
+    private void OnRectTransformDimensionsChange()
+    {
+        if(gameObject.activeInHierarchy)
+        {
+            RefreshContents();
+        }
+    }
+
+    private void OnEnable()
 	{
 		// refresh contents on screen change
 		if (pollForScreenOrientationChange)
@@ -496,7 +507,8 @@ public class ScreenSwipe : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndD
 					nextButton.gameObject.SetActive(true);
 				}
 			}
-		}
+            onScreenChanged?.Invoke(currentScreen);
+        }
 		else
 			Debug.LogErrorFormat($"Invalid screen number '{screenNumber}'. Must be between 0 and {screens.Count - 1}");
 	}
@@ -528,12 +540,37 @@ public class ScreenSwipe : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndD
 	{
 		return index >= 0 && index < screens.Count;
 	}
-	#endregion
+    #endregion
 
-	#region Swipe and Drag Controlls
+    #region Swipe and Drag Controls
+
+    private bool dragParent = false;
 	public void OnBeginDrag(PointerEventData eventData)
 	{
-		if (eventData.button != PointerEventData.InputButton.Left || !isInteractable)
+        if(ParentScrollView != null)
+        {
+            Vector2 d = eventData.delta;
+            if(swipeType == SwipeType.Horizontal && Math.Abs(d.y) > Math.Abs(d.x)) // vertical swipe detected
+            {
+                dragParent = true;
+            }
+            else if(swipeType == SwipeType.Vertical && Math.Abs(d.x) > Math.Abs(d.y))
+            {
+                dragParent = true;
+            }
+            else
+            {
+                dragParent = false;
+            }
+
+            if (dragParent)
+            {
+                ParentScrollView.OnBeginDrag(eventData);
+                return;
+            }
+        }
+
+        if (eventData.button != PointerEventData.InputButton.Left || !isInteractable)
 			return;
 
 		onScreenDragBegin?.Invoke();
@@ -552,7 +589,13 @@ public class ScreenSwipe : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndD
 
 	public void OnDrag(PointerEventData eventData)
 	{
-		if (eventData.button != PointerEventData.InputButton.Left || !isInteractable)
+        if (dragParent)
+        {
+            ParentScrollView.OnDrag(eventData);
+            return;
+        }
+
+        if (eventData.button != PointerEventData.InputButton.Left || !isInteractable)
 			return;
 
 		DragContent(eventData);
@@ -563,7 +606,14 @@ public class ScreenSwipe : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndD
 
 	public void OnEndDrag(PointerEventData eventData)
 	{
-		if (eventData.button != PointerEventData.InputButton.Left || !isInteractable)
+        if (dragParent)
+        {
+            ParentScrollView.OnEndDrag(eventData);
+            dragParent = false;
+            return;
+        }
+
+        if (eventData.button != PointerEventData.InputButton.Left || !isInteractable)
 			return;
 
 		// validate screen change and sets current screen 

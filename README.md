@@ -1,3 +1,11 @@
+# Fork
+Fork of https://github.com/brogan89/ScreenSwipe
+
+Modifications:
+- Added OnRectTransformDimensionsChange() to handle redraw on UI resize
+- Added fix for when ScreenSwipe is hosted in a ScrollView. (See the Drag Handler functions for changes). Mods based on [Information here](https://forum.unity.com/threads/nested-scrollrect.268551/#post-1906953)
+
+
 # ScreenSwipe
 
 - Right click in hierarchy choose UI > Screen Swipe > Screen Swipe. 
